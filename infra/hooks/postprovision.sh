@@ -39,14 +39,18 @@ dotnet user-secrets set "AzureOpenAI:Endpoint"   "${ENDPOINT}"   --project "${PR
 dotnet user-secrets set "AzureOpenAI:ApiKey"     "${KEY}"        --project "${PROJ}" >/dev/null
 dotnet user-secrets set "AzureOpenAI:Deployment" "${DEPLOYMENT}" --project "${PROJ}" >/dev/null
 
-echo ""
-echo "postprovision: user-secrets written for ECS2026MAF (shared with ECS2026MAF.Eval)."
-echo ""
-echo "  subscription = ${SUB_NAME}  (${SUB_ID})"
-echo "  resource     = ${RESOURCE}"
-echo "  resource grp = ${RG}"
-echo "  endpoint     = ${ENDPOINT}"
-echo "  deployment   = ${DEPLOYMENT}"
-echo ""
-echo "Smoke test:    dotnet run --project AgentEval/samples/ECS2026MAF -- --smoke"
-echo "Tear down:     azd down --purge"
+# azd up swallows stdout from hooks but streams stderr. Write the summary to
+# stderr so attendees actually see it after `azd up` finishes.
+{
+  echo ""
+  echo "postprovision: user-secrets written for ECS2026MAF (shared with ECS2026MAF.Eval)."
+  echo ""
+  echo "  subscription = ${SUB_NAME}  (${SUB_ID})"
+  echo "  resource     = ${RESOURCE}"
+  echo "  resource grp = ${RG}"
+  echo "  endpoint     = ${ENDPOINT}"
+  echo "  deployment   = ${DEPLOYMENT}"
+  echo ""
+  echo "Smoke test:    dotnet run --project AgentEval/samples/ECS2026MAF -- --smoke"
+  echo "Tear down:     azd down --purge"
+} >&2

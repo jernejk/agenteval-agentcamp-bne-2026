@@ -43,14 +43,16 @@ dotnet user-secrets set 'AzureOpenAI:Endpoint'   $Endpoint   --project $Proj | O
 dotnet user-secrets set 'AzureOpenAI:ApiKey'     $Key        --project $Proj | Out-Null
 dotnet user-secrets set 'AzureOpenAI:Deployment' $Deployment --project $Proj | Out-Null
 
-Write-Host ''
-Write-Host 'postprovision: user-secrets written for ECS2026MAF (shared with ECS2026MAF.Eval).'
-Write-Host ''
-Write-Host "  subscription = $SubName  ($SubId)"
-Write-Host "  resource     = $Resource"
-Write-Host "  resource grp = $Rg"
-Write-Host "  endpoint     = $Endpoint"
-Write-Host "  deployment   = $Deployment"
-Write-Host ''
-Write-Host 'Smoke test:    dotnet run --project AgentEval/samples/ECS2026MAF -- --smoke'
-Write-Host 'Tear down:     azd down --purge'
+# azd up swallows hook stdout but streams stderr. Write the summary to
+# stderr so attendees see it after `azd up` finishes.
+[Console]::Error.WriteLine('')
+[Console]::Error.WriteLine('postprovision: user-secrets written for ECS2026MAF (shared with ECS2026MAF.Eval).')
+[Console]::Error.WriteLine('')
+[Console]::Error.WriteLine("  subscription = $SubName  ($SubId)")
+[Console]::Error.WriteLine("  resource     = $Resource")
+[Console]::Error.WriteLine("  resource grp = $Rg")
+[Console]::Error.WriteLine("  endpoint     = $Endpoint")
+[Console]::Error.WriteLine("  deployment   = $Deployment")
+[Console]::Error.WriteLine('')
+[Console]::Error.WriteLine('Smoke test:    dotnet run --project AgentEval/samples/ECS2026MAF -- --smoke')
+[Console]::Error.WriteLine('Tear down:     azd down --purge')
