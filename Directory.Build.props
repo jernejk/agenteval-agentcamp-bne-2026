@@ -7,7 +7,8 @@
 
     <Authors>Jose Luis Latorre; Jernej Kavka (JK)</Authors>
     <Company>AgentCamp Brisbane 2026</Company>
-    <RepositoryUrl>https://github.com/jernejk/AgentEval-AgentCampBrisbane2026</RepositoryUrl>
+    <RepositoryUrl>https://github.com/jernejk/agenteval-agentcamp-bne-2026</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/jernejk/agenteval-agentcamp-bne-2026</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright (c) 2026 Jose Luis Latorre Millas and Jernej Kavka (JK)</Copyright>
