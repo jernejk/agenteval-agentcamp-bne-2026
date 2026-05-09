@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>preview</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+    <Authors>Jose Luis Latorre; Jernej Kavka (JK)</Authors>
+    <Company>AgentCamp Brisbane 2026</Company>
+    <RepositoryUrl>https://github.com/jernejk/AgentEval-AgentCampBrisbane2026</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) 2026 Jose Luis Latorre Millas and Jernej Kavka (JK)</Copyright>
+  </PropertyGroup>
+</Project>
