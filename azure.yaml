@@ -1,0 +1,15 @@
+name: agentcamp-bne-2026
+metadata:
+  template: agentcamp-bne-2026@0.1.0
+infra:
+  provider: bicep
+  path: infra
+  module: main
+hooks:
+  postprovision:
+    posix:
+      shell: sh
+      run: ./infra/hooks/postprovision.sh
+    windows:
+      shell: pwsh
+      run: ./infra/hooks/postprovision.ps1

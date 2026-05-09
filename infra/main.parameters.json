@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "${AZURE_LOCATION=australiaeast}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP_NAME=rg-agentcamp-bne-2026}"
+    },
+    "openAiResourceName": {
+      "value": "${AZURE_OPENAI_RESOURCE_NAME=oai-agentcamp-bne-2026}"
+    },
+    "deploymentName": {
+      "value": "${AZURE_OPENAI_DEPLOYMENT=gpt-5.4-mini}"
+    },
+    "modelName": {
+      "value": "${AZURE_OPENAI_MODEL_NAME=gpt-5.4-mini}"
+    },
+    "modelVersion": {
+      "value": "${AZURE_OPENAI_MODEL_VERSION}"
+    },
+    "modelFormat": {
+      "value": "${AZURE_OPENAI_MODEL_FORMAT=OpenAI}"
+    },
+    "skuName": {
+      "value": "${AZURE_OPENAI_SKU_NAME=GlobalStandard}"
+    },
+    "skuCapacity": {
+      "value": "${AZURE_OPENAI_SKU_CAPACITY=1}"
+    }
+  }
+}
