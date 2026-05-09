@@ -7,10 +7,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
-
-    <!-- Standalone demo project — intentionally NOT in AgentEval.sln -->
-    <!-- No AgentEval dependencies: pure MAF + Azure OpenAI only -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+
+    <!-- Shared with ECS2026MAF.Eval so user-secrets land in one place. -->
+    <UserSecretsId>agentcamp-bne-2026-ecs2026maf</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +20,13 @@
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.5.0" />
     <PackageReference Include="System.Memory.Data" Version="10.0.3" />
+
+    <!-- Configuration: AzureOpenAI:* values come from user-secrets first, env-vars second. -->
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.3" />
+
     <!-- Security: transitive pin (GHSA-g94r-2vxg-569j) -->
     <PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
   </ItemGroup>
