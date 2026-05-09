@@ -1,20 +1,80 @@
+// Originally from joslat/AgentEval at samples/ECS2026MAF/Program.cs.
+// Modified for AgentCamp Brisbane 2026: --smoke flag for the cheapest possible
+// round-trip against the deployment (used by the setup-project skill).
+// Special thanks to Jose Luis Latorre.
+//
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 ECS2026 Demo
 //
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║               ECS2026MAF — Microsoft Agent Framework Demos                  ║
-// ║   Pure MAF code — no AgentEval dependencies in this project                 ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-//
 // Run:
-//   dotnet run --project samples/ECS2026MAF
+//   dotnet run --project AgentEval/samples/ECS2026MAF
+//   dotnet run --project AgentEval/samples/ECS2026MAF -- --smoke
 
 using System.Text;
+using Azure.AI.OpenAI;
+using ECS2026MAF;
 using ECS2026MAF.Demos;
+using Microsoft.Extensions.AI;
+using ChatOptions = Microsoft.Extensions.AI.ChatOptions;
 
 Console.OutputEncoding = Encoding.UTF8;
 
+if (args.Length > 0 && (args[0] == "--smoke" || args[0] == "-s"))
+{
+    return await RunSmokeTestAsync();
+}
+
 await ShowMenuAsync();
+return 0;
+
+static async Task<int> RunSmokeTestAsync()
+{
+    Console.WriteLine("Smoke test — one-shot 'Hi' against the deployment.");
+    if (!Config.IsConfigured)
+    {
+        Console.Error.WriteLine("FAIL: AzureOpenAI credentials missing. Run `azd up` or `dotnet user-secrets set AzureOpenAI:* ...`.");
+        return 1;
+    }
+
+    Console.WriteLine($"  endpoint   = {Config.Endpoint}");
+    Console.WriteLine($"  deployment = {Config.Model}");
+    Console.WriteLine();
+
+    try
+    {
+        var azureClient = new AzureOpenAIClient(Config.Endpoint, Config.KeyCredential);
+        var chat        = azureClient.GetChatClient(Config.Model).AsIChatClient();
+
+        var sw       = System.Diagnostics.Stopwatch.StartNew();
+        var response = await chat.GetResponseAsync(
+            "Reply with a single short greeting.",
+            new ChatOptions { MaxOutputTokens = 64 });
+        sw.Stop();
+
+        var text = response.Text.Trim();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            Console.Error.WriteLine("FAIL: deployment returned an empty response.");
+            return 1;
+        }
+
+        Console.WriteLine($"  reply      = {text}");
+        Console.WriteLine($"  latency    = {sw.ElapsedMilliseconds} ms");
+        Console.WriteLine();
+        Console.WriteLine("Smoke test passed. The model said hi.");
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"FAIL: {ex.GetType().Name}: {ex.Message}");
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Common causes:");
+        Console.Error.WriteLine("  - Deployment name mismatch (check `dotnet user-secrets list`).");
+        Console.Error.WriteLine("  - Region without quota for this model.");
+        Console.Error.WriteLine("  - Wrong subscription selected (check `az account show`).");
+        return 1;
+    }
+}
 
 static async Task ShowMenuAsync()
 {

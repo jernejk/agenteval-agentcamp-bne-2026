@@ -11,6 +11,18 @@ Use the host harness's native question UI (Claude Code: `AskUserQuestion`; Codex
 
 In one paragraph: tell them you'll do roughly 60 seconds of prereq checks, then 3-4 minutes of provisioning, then a smoke test. Reassure: everything tears down with `azd down --purge`. Read [CREDITS.md](../../../CREDITS.md) and credit Jose Luis Latorre / joslat/AgentEval upstream once.
 
+**Show the active subscription before doing anything else.** Run:
+
+```bash
+az account show --query "{name:name, id:id, user:user.name}" -o table
+```
+
+State the subscription name and ID back to the user explicitly: "I'm about to provision into **&lt;name&gt;** (`&lt;id&gt;`)." If they look surprised, ask whether to switch:
+
+> Use a different subscription? List with `az account list -o table` and switch with `az account set --subscription &lt;name-or-id&gt;`.
+
+Don't proceed to step 2 until the user has acknowledged the subscription. Anything provisioned in the wrong subscription wastes their cleanup time.
+
 ## Step 2 — Q1: Azure account
 
 Recommended option first.
@@ -56,7 +68,70 @@ Expect "Build succeeded." If it fails, stop and surface the error — common cau
 
 ## Step 5 — Q2: Resource group name
 
-Free text. Default: `rg-agentcamp-bne-2026-{6-random-chars}`. Generate the random suffix yourself (e.g. lowercase hex from current time).
+Default name: `rg-agentcamp-bne-2026`. **Before proposing it, check whether it already exists in the active subscription:**
+
+```bash
+az group exists --name rg-agentcamp-bne-2026
+```
+
+### If it returns `false`
+
+Propose `rg-agentcamp-bne-2026` as the default and accept any free-text override.
+
+### If it returns `true`
+
+Inspect what's already in there before asking:
+
+```bash
+az resource list \
+  --resource-group rg-agentcamp-bne-2026 \
+  --query "[].{name:name, type:type, location:location}" \
+  -o table
+```
+
+Then ask the user, listing exactly what you saw:
+
+> A resource group named **`rg-agentcamp-bne-2026`** already exists with these resources:
+>
+> &lt;table from above&gt;
+>
+> What do you want to do?
+>
+> 1. **Reuse it** — point this workshop at the existing OpenAI account/deployment (recommended if everything below is present).
+> 2. **Use a fresh group** — append a six-char random suffix and provision into the new one.
+> 3. **Use a different name entirely** — type your own.
+
+For option 1, run a quick health check before continuing. The reused RG must contain:
+
+- One `Microsoft.CognitiveServices/accounts` (kind `OpenAI`).
+- At least one deployment under it.
+
+```bash
+RG=rg-agentcamp-bne-2026
+ACCOUNT=$(az cognitiveservices account list -g "$RG" --query "[?kind=='OpenAI'].name | [0]" -o tsv)
+if [ -z "$ACCOUNT" ]; then echo "no Azure OpenAI account in $RG"; fi
+
+az cognitiveservices account deployment list \
+  --name "$ACCOUNT" --resource-group "$RG" \
+  --query "[].{name:name, model:properties.model.name, version:properties.model.version, sku:sku.name}" \
+  -o table
+```
+
+If the OpenAI account or a deployment is missing, switch to option 2 (fresh group with suffix) — partial reuse is more pain than it's worth.
+
+If reuse is healthy, **skip steps 6 and 7** and instead write user-secrets directly:
+
+```bash
+ENDPOINT=$(az cognitiveservices account show --name "$ACCOUNT" --resource-group "$RG" --query properties.endpoint -o tsv)
+DEPLOY=$(az cognitiveservices account deployment list --name "$ACCOUNT" --resource-group "$RG" --query "[0].name" -o tsv)
+KEY=$(az cognitiveservices account keys list --name "$ACCOUNT" --resource-group "$RG" --query key1 -o tsv)
+
+dotnet user-secrets set 'AzureOpenAI:Endpoint'   "$ENDPOINT" --project AgentEval/samples/ECS2026MAF
+dotnet user-secrets set 'AzureOpenAI:ApiKey'     "$KEY"      --project AgentEval/samples/ECS2026MAF
+dotnet user-secrets set 'AzureOpenAI:Deployment' "$DEPLOY"   --project AgentEval/samples/ECS2026MAF
+```
+
+Then jump straight to step 9 (smoke test).
 
 ## Step 6 — Q3: Region
 
@@ -80,7 +155,7 @@ Recommended first.
 
 ## Step 8 — Confirmation
 
-Echo all chosen values back. Remind: `azd down --purge` deletes everything when done. Then run:
+Echo all chosen values back, **including the subscription name and ID** from step 1 — that's what's actually getting charged. Remind: `azd down --purge` deletes everything when done. Then run:
 
 ```bash
 azd auth login                                                 # only if `azd auth show` reports no session

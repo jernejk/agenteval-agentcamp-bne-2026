@@ -20,6 +20,10 @@ if [ -z "${ENDPOINT}" ] || [ -z "${DEPLOYMENT}" ] || [ -z "${RESOURCE}" ] || [ -
   exit 1
 fi
 
+# Surface the active subscription so the user knows where this landed.
+SUB_NAME="$(az account show --query name -o tsv 2>/dev/null || echo unknown)"
+SUB_ID="$(az account show --query id -o tsv 2>/dev/null || echo unknown)"
+
 KEY="$(az cognitiveservices account keys list \
   --name "${RESOURCE}" \
   --resource-group "${RG}" \
@@ -35,7 +39,14 @@ dotnet user-secrets set "AzureOpenAI:Endpoint"   "${ENDPOINT}"   --project "${PR
 dotnet user-secrets set "AzureOpenAI:ApiKey"     "${KEY}"        --project "${PROJ}" >/dev/null
 dotnet user-secrets set "AzureOpenAI:Deployment" "${DEPLOYMENT}" --project "${PROJ}" >/dev/null
 
+echo ""
 echo "postprovision: user-secrets written for ECS2026MAF (shared with ECS2026MAF.Eval)."
-echo "postprovision: endpoint   = ${ENDPOINT}"
-echo "postprovision: deployment = ${DEPLOYMENT}"
-echo "postprovision: tear down with 'azd down --purge' when finished."
+echo ""
+echo "  subscription = ${SUB_NAME}  (${SUB_ID})"
+echo "  resource     = ${RESOURCE}"
+echo "  resource grp = ${RG}"
+echo "  endpoint     = ${ENDPOINT}"
+echo "  deployment   = ${DEPLOYMENT}"
+echo ""
+echo "Smoke test:    dotnet run --project AgentEval/samples/ECS2026MAF -- --smoke"
+echo "Tear down:     azd down --purge"
