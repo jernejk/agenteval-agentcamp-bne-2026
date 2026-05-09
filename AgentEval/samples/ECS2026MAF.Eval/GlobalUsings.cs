@@ -5,6 +5,7 @@
 
 global using ECS2026MAF;                    // Config.IsConfigured, Config.Endpoint, etc.
 global using ECS2026MAF.Evals;             // Eval01–05, EvalPrinter, EvalResultStore, etc.
+global using ECS2026MAF.Evals.Bonus;        // BonusEval01_RedTeaming, BonusEval02_ModelComparison
 global using AgentEval.Comparison;          // StochasticRunner, StochasticOptions, StochasticResult
 global using AgentEval.Core;               // ChatClientEvaluator, EvaluationOptions
 global using AgentEval.Models;             // TestCase, TestResult, WorkflowTestCase, etc.
