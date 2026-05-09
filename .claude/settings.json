@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE_PATHS\" in *.cs|*.csproj) dotnet format --include \"$CLAUDE_FILE_PATHS\" --no-restore --verbosity quiet >/dev/null 2>&1 || true ;; esac"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_BASH_COMMAND\" in *azd*down*|*az*group*delete*|*rm*-rf*) echo 'BLOCKED: confirm with the user before running destructive Azure / filesystem commands. Run interactively if you actually want this.' >&2; exit 2 ;; esac"
+          }
+        ]
+      }
+    ]
+  }
+}
