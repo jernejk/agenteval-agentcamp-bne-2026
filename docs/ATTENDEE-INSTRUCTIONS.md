@@ -39,6 +39,15 @@ azd auth login
 
 This opens a browser and prompts you to choose the subscription you want to deploy to. If you have only one, it picks it.
 
+> **Multiple tenants?** If the subscription you want to deploy to lives in a different Azure AD tenant than your default sign-in (common for Microsoft folks, MVPs, and consultants), `azd auth login` will pick the wrong one and the next step will fail with `failed to resolve user 'you@example.com' access to subscription`. Find the right tenant ID and re-auth:
+>
+> ```bash
+> az account show --subscription <subscription-id> --query tenantId -o tsv
+> azd auth login --tenant-id <tenant-id-from-above>
+> ```
+>
+> If `azd up` later complains about an expired token (`AADSTS700082`), run `azd auth login --tenant-id <tenant-id>` again.
+
 ## 3. `azd up`
 
 ```bash
@@ -76,6 +85,16 @@ AzureOpenAI:Endpoint = https://oai-agentcamp-bne-2026.openai.azure.com/
 AzureOpenAI:ApiKey = <redacted>
 AzureOpenAI:Deployment = gpt-5.4-mini
 ```
+
+> **If you're projecting or screen-sharing**, redact the key before running `list` — pipe through `grep` so it never reaches the screen scrollback:
+>
+> ```bash
+> dotnet user-secrets list --project AgentEval/samples/ECS2026MAF | grep -v ApiKey
+> ```
+>
+> ```powershell
+> dotnet user-secrets list --project AgentEval/samples/ECS2026MAF | Select-String -NotMatch ApiKey
+> ```
 
 ## 5. Build
 

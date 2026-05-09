@@ -14,14 +14,28 @@ In one paragraph: tell them you'll do roughly 60 seconds of prereq checks, then 
 **Show the active subscription before doing anything else.** Run:
 
 ```bash
-az account show --query "{name:name, id:id, user:user.name}" -o table
+az account show --query "{name:name, id:id, tenantId:tenantId, user:user.name}" -o table
 ```
 
-State the subscription name and ID back to the user explicitly: "I'm about to provision into **&lt;name&gt;** (`&lt;id&gt;`)." If they look surprised, ask whether to switch:
+State the subscription name, ID, and **tenant ID** back to the user: "I'm about to provision into **&lt;name&gt;** (`&lt;id&gt;`) in tenant `&lt;tenant&gt;`." If they look surprised, ask whether to switch:
 
 > Use a different subscription? List with `az account list -o table` and switch with `az account set --subscription &lt;name-or-id&gt;`.
 
-Don't proceed to step 2 until the user has acknowledged the subscription. Anything provisioned in the wrong subscription wastes their cleanup time.
+**Cross-tenant check (important).** `azd auth login` defaults to the user's home tenant, which may not match the tenant the chosen subscription lives in. This is common for Microsoft staff, MVPs, and consultants with multiple work/personal accounts. If you don't catch it now, `azd up` later will fail with `failed to resolve user '...' access to subscription`. Detect proactively:
+
+```bash
+AZD_USER=$(azd auth show --output json 2>/dev/null | jq -r '.account.username // empty')
+AZ_USER=$(az account show --query user.name -o tsv 2>/dev/null)
+SUB_TENANT=$(az account show --query tenantId -o tsv 2>/dev/null)
+```
+
+If `azd auth show` reports nothing (not logged in) or its tenant doesn't match `SUB_TENANT`, run:
+
+```bash
+azd auth login --tenant-id "$SUB_TENANT"
+```
+
+Don't proceed to step 2 until both the subscription and the azd auth tenant are confirmed correct. Anything provisioned in the wrong subscription/tenant wastes the user's cleanup time.
 
 ## Step 2 — Q1: Azure account
 

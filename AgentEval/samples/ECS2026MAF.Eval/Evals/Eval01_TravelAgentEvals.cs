@@ -22,7 +22,9 @@ namespace ECS2026MAF.Evals;
 /// </summary>
 public static class Eval01_TravelAgentEvals
 {
-    private const string SnapshotKey = "eval01_agent";
+    // Distinct from the real Eval01's "eval01_agent" key so the placeholder
+    // run never masquerades as a real snapshot when Eval03 reads the store.
+    private const string SnapshotKey = "eval01_agent_placeholder";
 
     public static Task RunAsync()
     {

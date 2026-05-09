@@ -12,9 +12,17 @@ Walk it linearly. Ask one question at a time, recommend the safe option first, a
 
 ## Show the subscription up front
 
-Before any questions, run `az account show --query "{name:name, id:id, user:user.name}" -o table` and state back to the user "I'm about to provision into **&lt;name&gt;** (`&lt;id&gt;`)." Get explicit acknowledgement before continuing. Anything provisioned in the wrong subscription wastes their cleanup time.
+Before any questions, run `az account show --query "{name:name, id:id, tenantId:tenantId, user:user.name}" -o table` and state back to the user "I'm about to provision into **&lt;name&gt;** (`&lt;id&gt;`) in tenant `&lt;tenantId&gt;`." Get explicit acknowledgement before continuing. Anything provisioned in the wrong subscription wastes their cleanup time.
 
 If they want to switch: `az account list -o table` then `az account set --subscription <name-or-id>`.
+
+**Cross-tenant check.** `azd auth login` defaults to the user's home tenant, which often doesn't match the tenant the chosen subscription lives in (Microsoft staff, MVPs, multi-tenant consultants). Catch it now before `azd up` blows up later with `failed to resolve user access to subscription`:
+
+```bash
+SUB_TENANT=$(az account show --query tenantId -o tsv)
+AZD_TENANT=$(azd auth show --output json 2>/dev/null | jq -r '.account.tenantId // empty')
+[ "$SUB_TENANT" = "$AZD_TENANT" ] || azd auth login --tenant-id "$SUB_TENANT"
+```
 
 ## Questions to ask
 
