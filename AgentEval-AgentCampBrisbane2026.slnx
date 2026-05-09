@@ -1,2 +1,6 @@
 <Solution>
+  <Folder Name="/AgentEval/" />
+  <Folder Name="/AgentEval/samples/">
+    <Project Path="AgentEval/samples/ECS2026MAF/ECS2026MAF.csproj" />
+  </Folder>
 </Solution>
